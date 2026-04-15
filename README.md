@@ -33,7 +33,7 @@ Production-ready MultiMind implementation with Next.js App Router frontend and f
 ## Setup
 
 1. Install web dependencies:
-   - npm --prefix apps/web install
+   - npm install
 2. Install Python dependencies:
    - python -m pip install -r services/requirements.txt
 3. Copy env template:
@@ -46,9 +46,9 @@ Production-ready MultiMind implementation with Next.js App Router frontend and f
 
 - npm run dev: Starts web app + all four FastAPI services
 - npm run stop: Stops default dev ports
-- npm run lint: Runs web linting
-- npm run test: Runs web unit tests
-- npm run build: Builds web app
+- npm run lint: Runs web linting from the workspace root
+- npm run test: Runs web unit tests from the workspace root
+- npm run build: Builds the web app from the workspace root
 
 ## Health Endpoints
 
@@ -89,6 +89,8 @@ Response shape:
 
 ## Deployment Notes
 
-- Deploy Next.js app and expose Python services reachable from the web runtime.
+- Deploy the repo from the workspace root on Vercel.
+- The root package is now an npm workspace, so Vercel should install `apps/web` automatically during the root install step.
+- Expose Python services reachable from the web runtime.
 - Set service URLs and API keys in runtime environment.
 - Ensure CORS/network policy allows Next.js server to reach each Python service.
