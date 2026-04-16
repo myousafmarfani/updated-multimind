@@ -18,6 +18,10 @@ async function proxyFetch(url: string, init: RequestInit) {
   }
 }
 
+function shouldUseLocalService(serviceUrl?: string) {
+  return process.env.NODE_ENV !== "production" && Boolean(serviceUrl);
+}
+
 function buildMessages(payload: {
   prompt: string;
   instructions?: string;
@@ -152,7 +156,7 @@ export async function proxyModelPost(modelId: ModelId, request: Request) {
 
     const config = serviceConfig[modelId];
 
-    if (config.serviceUrl) {
+    if (shouldUseLocalService(config.serviceUrl)) {
       const upstream = await proxyFetch(`${config.serviceUrl}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -194,7 +198,7 @@ export async function proxyModelHealth(modelId: ModelId) {
   try {
     const config = serviceConfig[modelId];
 
-    if (config.serviceUrl) {
+    if (shouldUseLocalService(config.serviceUrl)) {
       const upstream = await proxyFetch(`${config.serviceUrl}/health`, {
         method: "GET",
         cache: "no-store",
