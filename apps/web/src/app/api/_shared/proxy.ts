@@ -71,6 +71,38 @@ function extractContentText(content: unknown) {
   return "";
 }
 
+function extractUpstreamError(payload: unknown) {
+  if (!payload || typeof payload !== "object") {
+    return "Upstream request failed";
+  }
+
+  const error = Reflect.get(payload, "error");
+  if (typeof error === "string" && error.trim()) {
+    return error;
+  }
+
+  if (error && typeof error === "object") {
+    const message = Reflect.get(error, "message");
+    const metadata = Reflect.get(error, "metadata");
+    const raw = metadata && typeof metadata === "object" ? Reflect.get(metadata, "raw") : "";
+
+    if (typeof raw === "string" && raw.trim()) {
+      return raw;
+    }
+
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+  }
+
+  const fallbackMessage = Reflect.get(payload, "message");
+  if (typeof fallbackMessage === "string" && fallbackMessage.trim()) {
+    return fallbackMessage;
+  }
+
+  return "Upstream request failed";
+}
+
 function resolveApiKey(candidateEnvNames: string[]) {
   for (const envName of candidateEnvNames) {
     const value = process.env[envName]?.trim();
@@ -121,7 +153,7 @@ async function callOpenRouter(modelId: ModelId, json: Parameters<typeof buildMes
   if (!response.ok) {
     return NextResponse.json(
       {
-        error: payload.error ?? payload.message ?? "OpenRouter request failed",
+        error: extractUpstreamError(payload),
         model: modelId,
       },
       { status: response.status },
